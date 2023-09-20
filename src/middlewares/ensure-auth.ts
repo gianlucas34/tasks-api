@@ -34,5 +34,8 @@ export const ensureAuth: RequestHandler = async (
     })
   }
 
-  next()
+  request.headers.userId = jwtData.id
+  request.headers.userEmail = jwtData.email
+
+  return next()
 }
