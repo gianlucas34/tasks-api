@@ -1,5 +1,4 @@
 import 'dotenv/config'
-import { Task } from '../models/Task'
 
 export default {
   host: process.env.DB_HOST,
@@ -8,5 +7,4 @@ export default {
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT),
   dialect: 'mysql',
-  models: [Task],
 }

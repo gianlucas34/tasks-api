@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
-import { Task } from '../models/Task'
+import { Task } from '../../models/Task'
 
 export const deleteTaskRoute = async (request: Request, response: Response) => {
   const paramsSchema = z.object({

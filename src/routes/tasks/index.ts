@@ -13,4 +13,4 @@ router.post('/tasks', createTaskRoute)
 router.put('/tasks/:id', updateTaskRoute)
 router.delete('/tasks/:id', deleteTaskRoute)
 
-export const TaskRoutes = router
+export const TasksRoutes = router

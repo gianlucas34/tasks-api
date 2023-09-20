@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { format } from 'date-fns'
-import { Task } from '../models/Task'
+import { Task } from '../../models/Task'
 
 export const getTaskByIdRoute = async (
   request: Request,

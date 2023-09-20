@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { format } from 'date-fns'
-import { Task } from '../models/Task'
+import { Task } from '../../models/Task'
 
 export const getAllTasksRoute = async (_: Request, response: Response) => {
   const tasksFromDB = await Task.findAll({ raw: true })

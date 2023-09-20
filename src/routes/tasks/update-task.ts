@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 import { isBefore, parse } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
-import { Task } from '../models/Task'
+import { Task } from '../../models/Task'
 
 export const updateTaskRoute = async (request: Request, response: Response) => {
   const paramsSchema = z.object({
