@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
-import { parse } from 'date-fns'
+import { isBefore, parse } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
 import { Task } from '../models/Task'
 
@@ -20,6 +20,19 @@ export const updateTaskRoute = async (request: Request, response: Response) => {
     const { title, description, end_date, priority } = bodySchema.parse(
       request.body
     )
+    let parsedDate
+
+    if (!!end_date) {
+      parsedDate = parse(end_date, 'dd-MM-yyyy', new Date(), {
+        locale: BR,
+      })
+
+      if (isBefore(parsedDate, new Date())) {
+        return response.status(400).send({
+          error: 'Data de vencimento da tarefa não pode ser no passado!',
+        })
+      }
+    }
 
     await Task.update(
       {
