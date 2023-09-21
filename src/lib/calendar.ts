@@ -44,6 +44,7 @@ const insertEvent = async (task: Task) => {
   await googleCalendar.events.insert({
     calendarId: existingCalendar?.id || 'primary',
     requestBody: {
+      id: task.id.replace(/-/gi, ''),
       summary: task.title,
       description: task.description,
       start: {
@@ -58,4 +59,39 @@ const insertEvent = async (task: Task) => {
   })
 }
 
-export const calendar = { insertEvent }
+const updateEvent = async (
+  task: Pick<Task, 'id' | 'title' | 'description' | 'end_date'>
+) => {
+  const calendarsList = await googleCalendar.calendarList.list()
+  const calendars = calendarsList.data.items
+  const existingCalendar = calendars?.find(
+    (item) => item.summary === 'Tarefas - Desafio Akm'
+  )
+
+  const eventsList = await googleCalendar.events.list({
+    calendarId: existingCalendar?.id || 'primary',
+  })
+  const events = eventsList.data.items
+  const existingEvent = events?.find(
+    (item) => item.id === task.id.replace(/-/gi, '')
+  )
+
+  await googleCalendar.events.update({
+    calendarId: existingCalendar?.id || 'primary',
+    eventId: existingEvent?.id || '',
+    requestBody: {
+      summary: task.title,
+      description: task.description,
+      start: {
+        dateTime: existingEvent?.start?.dateTime,
+        timeZone: 'America/Sao_Paulo',
+      },
+      end: {
+        dateTime: task.end_date.toISOString(),
+        timeZone: 'America/Sao_Paulo',
+      },
+    },
+  })
+}
+
+export const calendar = { insertEvent, updateEvent }

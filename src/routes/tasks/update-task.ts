@@ -3,16 +3,17 @@ import { z } from 'zod'
 import { isBefore, parse } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
 import { Task } from '../../models/Task'
+import { calendar } from '../../lib/calendar'
 
 export const updateTaskRoute = async (request: Request, response: Response) => {
   const paramsSchema = z.object({
     id: z.string().uuid(),
   })
   const bodySchema = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    end_date: z.string().optional(),
-    priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+    title: z.string(),
+    description: z.string(),
+    end_date: z.string(),
+    priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
   })
 
   try {
@@ -20,18 +21,14 @@ export const updateTaskRoute = async (request: Request, response: Response) => {
     const { title, description, end_date, priority } = bodySchema.parse(
       request.body
     )
-    let parsedDate
+    const parsedEndDate = parse(end_date, 'dd-MM-yyyy', new Date(), {
+      locale: BR,
+    })
 
-    if (!!end_date) {
-      parsedDate = parse(end_date, 'dd-MM-yyyy', new Date(), {
-        locale: BR,
+    if (isBefore(parsedEndDate, new Date())) {
+      return response.status(400).send({
+        error: 'Data de vencimento da tarefa não pode ser no passado!',
       })
-
-      if (isBefore(parsedDate, new Date())) {
-        return response.status(400).send({
-          error: 'Data de vencimento da tarefa não pode ser no passado!',
-        })
-      }
     }
 
     await Task.update(
@@ -39,14 +36,17 @@ export const updateTaskRoute = async (request: Request, response: Response) => {
         title,
         description,
         priority,
-        ...(!!end_date && {
-          end_date: parse(end_date, 'dd-MM-yyyy', new Date(), {
-            locale: BR,
-          }),
-        }),
+        end_date: parsedEndDate,
       },
       { where: { id } }
     )
+
+    await calendar.updateEvent({
+      id,
+      title,
+      description,
+      end_date: parsedEndDate,
+    })
 
     return response
       .status(200)
