@@ -94,4 +94,25 @@ const updateEvent = async (
   })
 }
 
-export const calendar = { insertEvent, updateEvent }
+const deleteEvent = async (taskId: string) => {
+  const calendarsList = await googleCalendar.calendarList.list()
+  const calendars = calendarsList.data.items
+  const existingCalendar = calendars?.find(
+    (item) => item.summary === 'Tarefas - Desafio Akm'
+  )
+
+  const eventsList = await googleCalendar.events.list({
+    calendarId: existingCalendar?.id || 'primary',
+  })
+  const events = eventsList.data.items
+  const existingEvent = events?.find(
+    (item) => item.id === taskId.replace(/-/gi, '')
+  )
+
+  await googleCalendar.events.delete({
+    calendarId: existingCalendar?.id || 'primary',
+    eventId: existingEvent?.id || '',
+  })
+}
+
+export const calendar = { insertEvent, updateEvent, deleteEvent }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { Task } from '../../models/Task'
+import { calendar } from '../../lib/calendar'
 
 export const deleteTaskRoute = async (request: Request, response: Response) => {
   const paramsSchema = z.object({
@@ -11,6 +12,7 @@ export const deleteTaskRoute = async (request: Request, response: Response) => {
     const { id } = paramsSchema.parse(request.params)
 
     await Task.destroy({ where: { id } })
+    await calendar.deleteEvent(id)
 
     return response
       .status(200)
