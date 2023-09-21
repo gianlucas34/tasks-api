@@ -4,6 +4,7 @@ import { parse, isBefore } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
 import { Task } from '../../models/Task'
 import { nodemailer } from '../../lib/nodemailer'
+import { calendar } from '../../lib/calendar'
 
 export const createTaskRoute = async (request: Request, response: Response) => {
   const headersSchema = z.object({
@@ -31,16 +32,17 @@ export const createTaskRoute = async (request: Request, response: Response) => {
       })
     }
 
-    await nodemailer.sendEmail({
-      email: userEmail,
-      task: { title, description },
-    })
-
     const task = await Task.create({
       title,
       description,
       priority,
       end_date: parsedDate,
+    })
+
+    await calendar.insertEvent(task)
+    await nodemailer.sendEmail({
+      email: userEmail,
+      task,
     })
 
     return response.status(201).json(task)

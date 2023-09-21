@@ -4,7 +4,7 @@ import { Task } from '../models/Task'
 
 interface SendEmailProps {
   email: string
-  task: Pick<Task, 'title' | 'description'>
+  task: Task
 }
 
 const sendEmail = async ({ email, task }: SendEmailProps) => {
