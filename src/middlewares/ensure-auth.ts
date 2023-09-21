@@ -1,5 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { verify } from '../lib/jwt'
+import { jwt } from '../lib/jwt'
 
 export const ensureAuth: RequestHandler = async (
   request: Request,
@@ -22,7 +22,7 @@ export const ensureAuth: RequestHandler = async (
     })
   }
 
-  const jwtData = verify(token)
+  const jwtData = jwt.verify(token)
 
   if (jwtData === 'JWT_SECRET_NOT_FOUND') {
     return response

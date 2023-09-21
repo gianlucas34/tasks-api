@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 import bcrypt from 'bcrypt'
 import { User } from '../../models/User'
-import { sign } from '../../lib/jwt'
+import { jwt } from '../../lib/jwt'
 
 export const signInRoute = async (request: Request, response: Response) => {
   const bodySchema = z.object({
@@ -26,7 +26,7 @@ export const signInRoute = async (request: Request, response: Response) => {
         .send({ error: 'Email e/ou senha incorreto(s)!' })
     }
 
-    const accessToken = sign({
+    const accessToken = jwt.sign({
       id: user.id,
       email: user.email,
     })

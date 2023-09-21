@@ -3,8 +3,12 @@ import { z } from 'zod'
 import { parse, isBefore } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
 import { Task } from '../../models/Task'
+import { nodemailer } from '../../lib/nodemailer'
 
 export const createTaskRoute = async (request: Request, response: Response) => {
+  const headersSchema = z.object({
+    userEmail: z.string(),
+  })
   const bodySchema = z.object({
     title: z.string(),
     description: z.string(),
@@ -13,6 +17,7 @@ export const createTaskRoute = async (request: Request, response: Response) => {
   })
 
   try {
+    const { userEmail } = headersSchema.parse(request.headers)
     const { title, description, end_date, priority } = bodySchema.parse(
       request.body
     )
@@ -25,6 +30,11 @@ export const createTaskRoute = async (request: Request, response: Response) => {
         error: 'Data de vencimento da tarefa não pode ser no passado!',
       })
     }
+
+    await nodemailer.sendEmail({
+      email: userEmail,
+      task: { title, description },
+    })
 
     const task = await Task.create({
       title,
