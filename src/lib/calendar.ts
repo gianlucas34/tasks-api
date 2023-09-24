@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { calendar_v3, google } from 'googleapis'
+import { google } from 'googleapis'
 import { Task } from '../models/Task'
 
 const oauth2Client = new google.auth.OAuth2(
@@ -14,19 +14,21 @@ const googleCalendar = google.calendar({ version: 'v3', auth: oauth2Client })
 const insertEvent = async (task: Task) => {
   const calendarsList = await googleCalendar.calendarList.list()
   const calendars = calendarsList.data.items
-  const calendarAlreadyExists = calendars?.findIndex(
+  const existingCalendar = calendars?.find(
     (item) => item.summary === 'Tarefas - Desafio Akm'
   )
-  let existingCalendar: calendar_v3.Schema$Calendar | undefined
+  let calendarId: string
 
-  if (calendarAlreadyExists === -1) {
+  if (!existingCalendar) {
     const response = await googleCalendar.calendars.insert({
       requestBody: {
         summary: 'Tarefas - Desafio Akm',
       },
     })
 
-    existingCalendar = response.data
+    calendarId = response.data.id as string
+  } else {
+    calendarId = existingCalendar.id as string
   }
 
   const d = new Date()
@@ -42,7 +44,7 @@ const insertEvent = async (task: Task) => {
   )
 
   await googleCalendar.events.insert({
-    calendarId: existingCalendar?.id || 'primary',
+    calendarId,
     requestBody: {
       id: task.id.replace(/-/gi, ''),
       summary: task.title,
